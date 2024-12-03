@@ -12,14 +12,15 @@ public class Day1 {
         if (args.length < 1) {
             throw new IllegalArgumentException("Usage: ./Day1 input_name");
         }
-
-        System.out.println(getTotalDistance(args[0]));
-    }
-
-    private static int getTotalDistance(String fileName) {
-        var filePath = "res/" + fileName + ".txt";
         var list1 = new ArrayList<Integer>();
         var list2 = new ArrayList<Integer>();
+
+        populateListFromFile(list1, list2, args[0]);
+        System.out.println(getTotalDistance(list1, list2));
+    }
+
+    private static void populateListFromFile(ArrayList<Integer> list1, ArrayList<Integer> list2, String fileName) {
+        var filePath = "res/" + fileName + ".txt";
 
         try (Stream<String> stream = Files.lines(Paths.get(filePath))) {
             stream.forEach(string -> {
@@ -35,14 +36,15 @@ public class Day1 {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    private static int getTotalDistance(ArrayList<Integer> list1, ArrayList<Integer> list2) {
         if (list1.size() != list2.size()) {
-            throw new IllegalStateException("Lists must be same size!!!");
+            throw new IllegalStateException("Lists must be of the same size.");
         }
 
         Collections.sort(list1);
         Collections.sort(list2);
-
 
         var totalDistance = 0;
 
