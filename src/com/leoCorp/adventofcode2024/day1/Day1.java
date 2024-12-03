@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.stream.Stream;
 
 public class Day1 {
@@ -12,14 +13,15 @@ public class Day1 {
         if (args.length < 1) {
             throw new IllegalArgumentException("Usage: ./Day1 input_name");
         }
-        var list1 = new ArrayList<Integer>();
-        var list2 = new ArrayList<Integer>();
+        var leftList = new ArrayList<Integer>();
+        var rightList = new ArrayList<Integer>();
 
-        populateListFromFile(list1, list2, args[0]);
-        System.out.println(getTotalDistance(list1, list2));
+        populateListFromFile(leftList, rightList, args[0]);
+        System.out.println(getTotalDistance(leftList, rightList));
+        System.out.println(computeSimilarityScore(leftList, rightList));
     }
 
-    private static void populateListFromFile(ArrayList<Integer> list1, ArrayList<Integer> list2, String fileName) {
+    private static void populateListFromFile(ArrayList<Integer> leftList, ArrayList<Integer> rightList, String fileName) {
         var filePath = "res/" + fileName + ".txt";
 
         try (Stream<String> stream = Files.lines(Paths.get(filePath))) {
@@ -30,28 +32,41 @@ public class Day1 {
                     throw new IllegalStateException("Wrong format (expected: number  number)");
                 }
 
-                list1.add(Integer.parseInt(nums[0]));
-                list2.add(Integer.parseInt(nums[1]));
+                leftList.add(Integer.parseInt(nums[0]));
+                rightList.add(Integer.parseInt(nums[1]));
             });
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e.getMessage());
         }
     }
 
-    private static int getTotalDistance(ArrayList<Integer> list1, ArrayList<Integer> list2) {
-        if (list1.size() != list2.size()) {
+    private static int getTotalDistance(ArrayList<Integer> leftList, ArrayList<Integer> rightList) {
+        if (leftList.size() != rightList.size()) {
             throw new IllegalStateException("Lists must be of the same size.");
         }
 
-        Collections.sort(list1);
-        Collections.sort(list2);
+        Collections.sort(leftList);
+        Collections.sort(rightList);
 
         var totalDistance = 0;
 
-        for (int i = 0; i < list1.size(); i++) {
-            totalDistance += Math.abs(list1.get(i) - list2.get(i));
+        for (int i = 0; i < leftList.size(); i++) {
+            totalDistance += Math.abs(leftList.get(i) - rightList.get(i));
         }
 
         return totalDistance;
+    }
+
+    private static int computeSimilarityScore(ArrayList<Integer> leftList, ArrayList<Integer> rightList) {
+        var similarityScore = 0;
+        var mapRightList = new HashMap<Integer, Integer>();
+
+        rightList.forEach(num -> mapRightList.merge(num, 1, Integer::sum));
+
+        similarityScore = leftList.stream()
+                .mapToInt(num -> num * mapRightList.getOrDefault(num, 0))
+                .sum();
+
+        return similarityScore;
     }
 }
